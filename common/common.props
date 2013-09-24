@@ -10,7 +10,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)common\includes;$(SolutionDir)common\baseclasses;$(SolutionDir)ffmpeg;$(SolutionDir)libbluray\src;$(SolutionDir)common\DSUtilLite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)common\includes;$(SolutionDir)common\baseclasses;$(SolutionDir)ffmpeg;$(SolutionDir)bin_$(PlatformName)\thirdparty\ffmpeg;$(SolutionDir)libbluray\src;$(SolutionDir)common\DSUtilLite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:inline /Zc:rvalueCast %(AdditionalOptions)</AdditionalOptions>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>Use</PrecompiledHeader>
