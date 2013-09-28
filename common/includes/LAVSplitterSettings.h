@@ -25,6 +25,10 @@
 DEFINE_GUID(IID_ILAVFSettings, 
 0x774a919d, 0xea95, 0x4a87, 0x8a, 0x1e, 0xf4, 0x8a, 0xbe, 0x84, 0x99, 0xc7);
 
+// {77C1027F-BF53-458F-82CE-9DD88A2C300B}
+DEFINE_GUID(IID_ILAVFSettingsMPCHCCustom, 
+0x77c1027f, 0xbf53, 0x458f, 0x82, 0xce, 0x9d, 0xd8, 0x8a, 0x2c, 0x30, 0xb);
+
 typedef enum LAVSubtitleMode {
   LAVSubtitleMode_NoSubs,
   LAVSubtitleMode_ForcedOnly,
@@ -184,4 +188,11 @@ interface ILAVFSettings : public IUnknown
 
   // Get the duration (in ms) of analysis for network streams (to find the streams and codec parameters)
   STDMETHOD_(DWORD, GetNetworkStreamAnalysisDuration)() = 0;
+};
+
+[uuid("77C1027F-BF53-458F-82CE-9DD88A2C300B")]
+interface ILAVFSettingsMPCHCCustom : public IUnknown
+{
+  // Set a custom callback function to handle the property page
+  STDMETHOD(SetPropertyPageCallback)(HRESULT (*fpPropPageCallback)(IBaseFilter* pFilter)) = 0;
 };
