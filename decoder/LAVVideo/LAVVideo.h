@@ -54,7 +54,8 @@ typedef struct {
 } TimingCache;
 
 [uuid("EE30215D-164F-4A92-A4EB-9D4C13390F9F")]
-class CLAVVideo : public CTransformFilter, public ISpecifyPropertyPages2, public ILAVVideoSettings, public ILAVVideoStatus, public ILAVVideoCallback
+class CLAVVideo : public CTransformFilter, public ISpecifyPropertyPages2,
+                  public ILAVVideoSettings, public ILAVVideoSettingsMPCHCCustom, public ILAVVideoStatus, public ILAVVideoCallback
 {
 public:
   CLAVVideo(LPUNKNOWN pUnk, HRESULT* phr);
@@ -128,6 +129,9 @@ public:
   STDMETHODIMP_(LAVDeintMode) GetDeinterlacingMode();
 
   STDMETHODIMP SetGPUDeviceIndex(DWORD dwDevice);
+
+  // ILAVVideoSettingsMPCHCCustom
+  STDMETHODIMP SetPropertyPageCallback(HRESULT (*fpPropPageCallback)(IBaseFilter* pFilter));
 
   // ILAVVideoStatus
   STDMETHODIMP_(const WCHAR *) GetActiveDecoderName() { return m_Decoder.GetDecoderName(); }
@@ -285,6 +289,7 @@ private:
   DWORD m_dwGPUDeviceIndex;
 
   CBaseTrayIcon *m_pTrayIcon;
+  HRESULT (*m_fpPropPageCallback)(IBaseFilter* pFilter);
 
 #ifdef DEBUG
   FloatingAverage<double> m_pixFmtTimingAvg;

@@ -60,6 +60,7 @@ CLAVSplitter::CLAVSplitter(LPUNKNOWN pUnk, HRESULT* phr)
   , m_bStopValid(FALSE)
   , m_rtOffset(0)
   , m_pTrayIcon(NULL)
+  , m_fpPropPageCallback(NULL)
 {
   WCHAR fileName[1024];
   GetModuleFileName(NULL, fileName, 1024);
@@ -130,6 +131,7 @@ STDMETHODIMP CLAVSplitter::CreateTrayIcon()
   if (CBaseTrayIcon::ProcessBlackList())
     return S_FALSE;
   m_pTrayIcon = new CLAVSplitterTrayIcon(this, TEXT(LAV_SPLITTER), IDI_ICON1);
+  m_pTrayIcon->SetCustomOpenPropPage(m_fpPropPageCallback);
   return S_OK;
 }
 
@@ -327,6 +329,7 @@ STDMETHODIMP CLAVSplitter::NonDelegatingQueryInterface(REFIID riid, void** ppv)
     QI(ISpecifyPropertyPages2)
     QI2(ILAVFSettings)
     QI2(ILAVFSettingsInternal)
+    QI2(ILAVFSettingsMPCHCCustom)
     QI(IObjectWithSite)
     QI(IBufferInfo)
     __super::NonDelegatingQueryInterface(riid, ppv);
@@ -1819,6 +1822,15 @@ STDMETHODIMP_(DWORD) CLAVSplitter::GetNetworkStreamAnalysisDuration()
 STDMETHODIMP_(std::set<FormatInfo>&) CLAVSplitter::GetInputFormats()
 {
   return m_InputFormats;
+}
+
+// ILAVFSettingsMPCHCCustom
+STDMETHODIMP CLAVSplitter::SetPropertyPageCallback(HRESULT (*fpPropPageCallback)(IBaseFilter* pFilter))
+{
+  m_fpPropPageCallback = fpPropPageCallback;
+  if (m_pTrayIcon)
+    m_pTrayIcon->SetCustomOpenPropPage(fpPropPageCallback);
+  return S_OK;  
 }
 
 CLAVSplitterSource::CLAVSplitterSource(LPUNKNOWN pUnk, HRESULT* phr)
