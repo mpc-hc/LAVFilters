@@ -102,6 +102,7 @@ CLAVAudio::CLAVAudio(LPUNKNOWN pUnk, HRESULT* phr)
   , m_MixingInputLayout(0)
   , m_pTrayIcon(NULL)
   , m_bForceDTSCore(FALSE)
+  , m_fpPropPageCallback(NULL)
 {
   StaticInit(TRUE, NULL);
 
@@ -174,6 +175,7 @@ STDMETHODIMP CLAVAudio::CreateTrayIcon()
   if (CBaseTrayIcon::ProcessBlackList())
     return S_FALSE;
   m_pTrayIcon = new CBaseTrayIcon(this, TEXT(LAV_AUDIO), IDI_ICON1);
+  m_pTrayIcon->SetCustomOpenPropPage(m_fpPropPageCallback);
   return S_OK;
 }
 
@@ -457,6 +459,7 @@ STDMETHODIMP CLAVAudio::NonDelegatingQueryInterface(REFIID riid, void** ppv)
     QI(ISpecifyPropertyPages)
     QI(ISpecifyPropertyPages2)
     QI2(ILAVAudioSettings)
+    QI2(ILAVAudioSettingsMPCHCCustom)
     QI2(ILAVAudioStatus)
     __super::NonDelegatingQueryInterface(riid, ppv);
 }
@@ -811,6 +814,15 @@ STDMETHODIMP CLAVAudio::SetSampleConvertDithering(BOOL bEnabled)
 STDMETHODIMP_(BOOL) CLAVAudio::GetSampleConvertDithering()
 {
   return m_settings.SampleConvertDither;
+}
+
+// ILAVAudioSettingsMPCHCCustom
+STDMETHODIMP CLAVAudio::SetPropertyPageCallback(HRESULT (*fpPropPageCallback)(IBaseFilter* pFilter))
+{
+  m_fpPropPageCallback = fpPropPageCallback;
+  if (m_pTrayIcon)
+    m_pTrayIcon->SetCustomOpenPropPage(fpPropPageCallback);
+  return S_OK;  
 }
 
 // ILAVAudioStatus
