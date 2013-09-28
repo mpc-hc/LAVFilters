@@ -62,6 +62,7 @@ class CLAVSplitter
   , public IAMStreamSelect
   , public IAMOpenProgress
   , public ILAVFSettingsInternal
+  , public ILAVFSettingsMPCHCCustom
   , public ISpecifyPropertyPages2
   , public IObjectWithSite
   , public IBufferInfo
@@ -173,6 +174,9 @@ public:
   STDMETHODIMP GetFormats(LPSTR** formats, UINT* nFormats);
   STDMETHODIMP SetNetworkStreamAnalysisDuration(DWORD dwDuration);
   STDMETHODIMP_(DWORD) GetNetworkStreamAnalysisDuration();
+
+  // ILAVFSettingsMPCHCCustom
+  STDMETHODIMP SetPropertyPageCallback(HRESULT (*fpPropPageCallback)(IBaseFilter* pFilter));
 
   // ILAVSplitterSettingsInternal
   STDMETHODIMP_(LPCSTR) GetInputFormat() { if (m_pDemuxer) return m_pDemuxer->GetContainerFormat(); return NULL; }
@@ -291,6 +295,7 @@ private:
   IUnknown *m_pSite;
 
   CBaseTrayIcon *m_pTrayIcon;
+  HRESULT (*m_fpPropPageCallback)(IBaseFilter* pFilter);
 };
 
 [uuid("B98D13E7-55DB-4385-A33D-09FD1BA26338")]
