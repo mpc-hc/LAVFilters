@@ -80,7 +80,8 @@ struct BufferDetails {
 struct DTSDecoder;
 
 [uuid("E8E73B6B-4CB3-44A4-BE99-4F7BCB96E491")]
-class CLAVAudio : public CTransformFilter, public ISpecifyPropertyPages2, public ILAVAudioSettings, public ILAVAudioStatus
+class CLAVAudio : public CTransformFilter, public ISpecifyPropertyPages2,
+                  public ILAVAudioSettings, public ILAVAudioSettingsMPCHCCustom, public ILAVAudioStatus
 {
 public:
   CLAVAudio(LPUNKNOWN pUnk, HRESULT* phr);
@@ -138,6 +139,9 @@ public:
   STDMETHODIMP_(BOOL) GetSuppressFormatChanges();
   STDMETHODIMP SetOutput51LegacyLayout(BOOL b51Legacy);
   STDMETHODIMP_(BOOL) GetOutput51LegacyLayout();
+
+  // ILAVAudioSettingsMPCHCCustom
+  STDMETHODIMP SetPropertyPageCallback(HRESULT (*fpPropPageCallback)(IBaseFilter* pFilter));
 
   // ILAVAudioStatus
   STDMETHODIMP_(BOOL) IsSampleFormatSupported(LAVAudioSampleFormat sfCheck);
@@ -352,4 +356,5 @@ private:
   } m_raData;
 
   CBaseTrayIcon *m_pTrayIcon = nullptr;
+  HRESULT (*m_fpPropPageCallback)(IBaseFilter* pFilter) = nullptr;
 };
