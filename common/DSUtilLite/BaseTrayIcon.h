@@ -28,6 +28,7 @@ public:
   void Destroy();
 
   static BOOL ProcessBlackList();
+  HRESULT SetCustomOpenPropPage(HRESULT (*fpCustomOpenPropPage)(IBaseFilter* pFilter));
 
 protected:
   virtual ~CBaseTrayIcon(void);
@@ -58,6 +59,7 @@ private:
   HANDLE m_hThread;
   HWND m_hWnd;
   BOOL m_bPropPageOpen;
+  HRESULT (*m_fpCustomOpenPropPage)(IBaseFilter* pFilter);
 
   const WCHAR *m_wszName;
   int m_resIcon;

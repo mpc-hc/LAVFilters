@@ -88,6 +88,7 @@ CLAVVideo::CLAVVideo(LPUNKNOWN pUnk, HRESULT* phr)
   , m_bInDVDMenu(FALSE)
   , m_ControlThread(NULL)
   , m_pTrayIcon(NULL)
+  , m_fpPropPageCallback(NULL)
 {
   *phr = S_OK;
   m_pInput = new CVideoInputPin(TEXT("CVideoInputPin"), this, phr, L"Input");
@@ -148,6 +149,7 @@ HRESULT CLAVVideo::CreateTrayIcon()
   if (CBaseTrayIcon::ProcessBlackList())
     return S_FALSE;
   m_pTrayIcon = new CBaseTrayIcon(this, TEXT(LAV_VIDEO), IDI_ICON1);
+  m_pTrayIcon->SetCustomOpenPropPage(m_fpPropPageCallback);
   return S_OK;
 }
 
@@ -408,6 +410,7 @@ STDMETHODIMP CLAVVideo::NonDelegatingQueryInterface(REFIID riid, void** ppv)
     QI(ISpecifyPropertyPages)
     QI(ISpecifyPropertyPages2)
     QI2(ILAVVideoSettings)
+    QI2(ILAVVideoSettingsMPCHCCustom)
     QI2(ILAVVideoStatus)
     __super::NonDelegatingQueryInterface(riid, ppv);
 }
@@ -1966,6 +1969,15 @@ STDMETHODIMP CLAVVideo::SetDeinterlacingMode(LAVDeintMode deintMode)
 STDMETHODIMP_(LAVDeintMode) CLAVVideo::GetDeinterlacingMode()
 {
   return m_settings.DeintMode;
+}
+
+// ILAVVideoSettingsMPCHCCustom
+STDMETHODIMP CLAVVideo::SetPropertyPageCallback(HRESULT (*fpPropPageCallback)(IBaseFilter* pFilter))
+{
+  m_fpPropPageCallback = fpPropPageCallback;
+  if (m_pTrayIcon)
+    m_pTrayIcon->SetCustomOpenPropPage(fpPropPageCallback);
+  return S_OK;  
 }
 
 CLAVControlThread::CLAVControlThread(CLAVVideo *pLAVVideo)
