@@ -75,6 +75,9 @@
     <Manifest>
       <AdditionalManifestFiles>$(ProjectDir)\$(ProjectName).manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
+    <PreBuildEvent>
+      <Command>..\..\update_version.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
@@ -93,6 +96,9 @@
     <Manifest>
       <AdditionalManifestFiles>$(ProjectDir)\$(ProjectName).manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
+    <PreBuildEvent>
+      <Command>..\..\update_version.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="decoders\avcodec.cpp" />
