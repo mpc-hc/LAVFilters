@@ -3,48 +3,29 @@ SETLOCAL
 
 PUSHD "%~dp0"
 
-SET nbMAJOR_PART=0
-SET nbCOMMIT_PART=0
-SET nbHASH_PART=00000
-SET OLDVER=
-
-:: check for git presence
-CALL git describe >NUL 2>&1
-IF ERRORLEVEL 1 (
-    GOTO NOGIT
+IF EXIST "..\..\..\..\..\build.user.bat" (
+  CALL "..\..\..\..\..\build.user.bat"
+) ELSE (
+  IF DEFINED GIT  (SET MPCHC_GIT=%GIT%)
+  IF DEFINED MSYS (SET MPCHC_MSYS=%MSYS%) ELSE (GOTO MissingVar)
 )
 
-:: Get git-describe output
-FOR /F "tokens=*" %%A IN ('"git describe --long --abbrev=5 HEAD"') DO (
-  SET strFILE_VERSION=%%A
-)
+SET PATH=%MPCHC_MSYS%\bin;%MPCHC_GIT%\cmd;%PATH%
+FOR %%G IN (bash.exe) DO (SET FOUND=%%~$PATH:G)
+IF NOT DEFINED FOUND GOTO MissingVar
 
-:: Split into tag, nb commits, hash
-FOR /F "tokens=1,2,3 delims=-" %%A IN ("%strFILE_VERSION%") DO (
-  SET nbMAJOR_PART=%%A
-  SET nbCOMMIT_PART=%%B
-  SET nbHASH_PART=%%C
-)
+bash.exe ./version.sh
 
-:: strip the "g" off the hash
-SET nbHASH_PART=%nbHASH_PART:~1%
-
-:WRITE_VER
-
-:: check if info changed, and write if needed
-IF EXIST includes\version_rev.h (
-    SET /P OLDVER=<includes\version_rev.h
-)
-SET NEWVER=#define LAV_VERSION_BUILD %nbCOMMIT_PART%
-IF NOT "%NEWVER%" == "%OLDVER%" (
-    ECHO %NEWVER%> includes\version_rev.h
-)
-GOTO :END
-
-:NOGIT
-echo Git not found
-goto WRITE_VER
 
 :END
 POPD
 ENDLOCAL
+EXIT /B
+
+
+:MissingVar
+ECHO Not all build dependencies were found.
+ECHO.
+ECHO See "..\..\..\..\..\docs\Compilation.txt" for more information.
+ENDLOCAL
+EXIT /B 1
