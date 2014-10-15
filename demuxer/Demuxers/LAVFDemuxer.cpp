@@ -556,6 +556,9 @@ STDMETHODIMP CLAVFDemuxer::InitAVFormat(LPCOLESTR pszFileName, BOOL bForce)
         delete [] filename;
         delete [] mimetype;
       }
+    } else if (st->disposition & AV_DISPOSITION_ATTACHED_PIC && st->attached_pic.data && st->attached_pic.size > 0) {
+        // Export embedded JPEG cover-art through IDSMResourceBag interface
+        ResAppend(L"EmbeddedCover.jpg", L"", L"image/jpg", st->attached_pic.data, (DWORD)st->attached_pic.size);
     }
   }
 
