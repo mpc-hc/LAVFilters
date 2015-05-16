@@ -4,6 +4,7 @@ arch=x86
 archdir=Win32
 clean_build=true
 cross_prefix=
+verbose=false
 
 for opt in "$@"
 do
@@ -18,24 +19,33 @@ do
     quick)
             clean_build=false
             ;;
+    verbose)
+            verbose=true
+            ;;
     *)
             echo "Unknown Option $opt"
             exit 1
     esac
 done
 
-BASEDIR=$(pwd)
-THIRDPARTYPREFIX=$(pwd)/bin_${archdir}/thirdparty
-export PKG_CONFIG_PATH="${THIRDPARTYPREFIX}/lib/pkgconfig/"
+if ! $verbose ; then
+  pushd() {
+    command pushd "$@" > /dev/null
+  }
+  popd() {
+    command popd "$@" > /dev/null
+  }
+fi
+
+THIRDPARTY_PREFIX="$(pwd)/bin_${archdir}/thirdparty"
+DCADEC_SOURCE_PATH="$(pwd)/thirdparty/dcadec"
+DCADEC_BUILD_PATH="${THIRDPARTY_PREFIX}/dcadec"
+export PKG_CONFIG_PATH="${DCADEC_BUILD_PATH}"
 
 make_dirs() (
-  if [ ! -d bin_${archdir}/lib ]; then
-    mkdir -p bin_${archdir}/lib
-  fi
-
-  if [ ! -d bin_${archdir}d/lib ]; then
-    mkdir -p bin_${archdir}d/lib
-  fi
+  mkdir -p bin_${archdir}/lib
+  mkdir -p bin_${archdir}d/lib
+  mkdir -p "${DCADEC_BUILD_PATH}"
 )
 
 copy_libs() (
@@ -119,14 +129,13 @@ build() (
 )
 
 build_dcadec() (
-  mkdir -p "${THIRDPARTYPREFIX}/dcadec"
-  cd "${THIRDPARTYPREFIX}/dcadec"
+  pushd "${DCADEC_BUILD_PATH}"
   if $clean_build ; then
-    make -f "${BASEDIR}/thirdparty/dcadec/Makefile" CONFIG_WINDOWS=1 clean
+    make -f "${DCADEC_SOURCE_PATH}/Makefile" CONFIG_WINDOWS=1 clean
   fi
-  make -f "${BASEDIR}/thirdparty/dcadec/Makefile" -j$NUMBER_OF_PROCESSORS CONFIG_WINDOWS=1 CONFIG_SMALL=1 CC=${cross_prefix}gcc AR=${cross_prefix}ar PREFIX="${THIRDPARTYPREFIX}" install-lib
-
-  cd "${BASEDIR}"
+  make -f "${DCADEC_SOURCE_PATH}/Makefile" -j$NUMBER_OF_PROCESSORS CONFIG_WINDOWS=1 CONFIG_SMALL=1 CC=${cross_prefix}gcc AR=${cross_prefix}ar lib
+  make -f "${DCADEC_SOURCE_PATH}/Makefile" PREFIX="${THIRDPARTY_PREFIX}" LIBDIR="${DCADEC_BUILD_PATH}/libdcadec" INCLUDEDIR="${DCADEC_SOURCE_PATH}" dcadec.pc
+  popd
 )
 
 make_dirs
@@ -140,7 +149,7 @@ echo
 echo Building ffmpeg in GCC ${arch} Release config...
 echo
 
-cd ffmpeg
+pushd ffmpeg
 
 if $clean_build ; then
     clean
@@ -158,5 +167,3 @@ if ! $clean_build || [ ${CONFIGRETVAL} -eq 0 ]; then
   build &&
   copy_libs
 fi
-
-cd ..
