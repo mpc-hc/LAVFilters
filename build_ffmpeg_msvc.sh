@@ -3,6 +3,7 @@
 arch=x86
 archdir=Win32
 clean_build=true
+verbose=false
 
 for opt in "$@"
 do
@@ -15,6 +16,9 @@ do
             ;;
     quick)
             clean_build=false
+            ;; 
+    verbose)
+            verbose=true
             ;;
     *)
             echo "Unknown Option $opt"
@@ -22,10 +26,17 @@ do
     esac
 done
 
+if ! $verbose ; then
+  pushd() {
+    command pushd "$@" > /dev/null
+  }
+  popd() {
+    command popd "$@" > /dev/null
+  }
+fi
+
 make_dirs() (
-  if [ ! -d bin_${archdir}d/lib ]; then
-    mkdir -p bin_${archdir}d/lib
-  fi
+  mkdir -p bin_${archdir}d/lib
 )
 
 copy_libs() (
@@ -94,7 +105,7 @@ echo Building ffmpeg in MSVC Debug config...
 
 make_dirs
 
-cd ffmpeg
+pushd ffmpeg
 
 if $clean_build ; then
     clean
@@ -112,5 +123,3 @@ if ! $clean_build || [ ${CONFIGRETVAL} -eq 0 ]; then
   build &&
   copy_libs
 fi
-
-cd ..
