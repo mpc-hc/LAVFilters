@@ -8,6 +8,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <UseNativeEnvironment>true</UseNativeEnvironment>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(MPCHC_WINSDK_VER)' == ''">8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(MPCHC_WINSDK_VER)' != ''">$(MPCHC_WINSDK_VER)</WindowsTargetPlatformVersion>
   </PropertyGroup>
 </Project>
